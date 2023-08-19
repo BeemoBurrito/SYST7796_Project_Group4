@@ -1,16 +1,13 @@
-// Importing necessary classes
 package Deliverable3;
+
 import java.util.Scanner;
 
-// Definition of the BlackjackGame class, extending the Game class
 public class BlackjackGame extends Game {
 
-    // Private member variables to hold the deck, player, and dealer
     private final GroupOfCards deck;
     private final BlackjackPlayer player;
     private final Dealer dealer;
 
-    // Constructor for initializing the game with a name and deck
     public BlackjackGame(String name, GroupOfCards deck) {
         super(name);
         this.deck = deck;
@@ -18,7 +15,6 @@ public class BlackjackGame extends Game {
         this.dealer = new Dealer();
     }
 
-    // Getter methods for accessing player and dealer
     public BlackjackPlayer getPlayer() {
         return player;
     }
@@ -27,7 +23,6 @@ public class BlackjackGame extends Game {
         return dealer;
     }
 
-    // Private method to deal the initial cards to player and dealer
     private void dealStartingCards() {
         player.addToHand(deck.getCards().remove(0));
         dealer.addToHand(deck.getCards().remove(0));
@@ -35,33 +30,91 @@ public class BlackjackGame extends Game {
         dealer.addToHand(deck.getCards().remove(0));
     }
 
-    // Overriding the play method from the parent class
     @Override
     public void play() {
         Scanner input = new Scanner(System.in);
         System.out.println("Welcome to Blackjack!");
 
+        do {
+            startNewRound();
+
+            // Player's turn
+            playerTurn(input);
+
+            // Dealer's turn
+            dealerTurn();
+
+            // Determine the winner and display the result
+            determineWinner();
+
+            // Prompt the player to play again
+        } while (playAgain(input));
+
+        input.close();
+    }
+
+    @Override
+    public void declareWinner() {
 
     }
 
-    // Method to declare the winner based on hand values
-    public void declareWinner() {
-        int maxScore = 0;
-        Player winner = null;
+    private void startNewRound() {
+        deck.shuffle();
+        player.resetHand();
+        dealer.resetHand();
+        dealStartingCards();
+    }
 
-        for (Player player : getPlayers()) {
-            int playerScore = player.getHandValue();
-            if (playerScore <= 21 && playerScore > maxScore) {
-                maxScore = playerScore;
-                winner = player;
+    private void playerTurn(Scanner input) {
+        while (player.getHandValue() < 21) {
+            displayGameState(dealer, player);
+            System.out.print("Do you want to Hit (H) or Stand (S)? ");
+
+            String playerChoice = input.nextLine();
+
+            if (playerChoice.equalsIgnoreCase("H")) {
+                player.addToHand(deck.getCards().remove(0));
+            } else if (playerChoice.equalsIgnoreCase("S")) {
+                break;
+            } else {
+                System.out.println("Invalid choice");
             }
         }
+    }
 
-        // Displaying the winner or a message if all players busted
-        if (winner != null) {
-            System.out.println("\n" + winner.getName() + " wins with a hand value of " + maxScore + "!");
-        } else {
-            System.out.println("\nNo winner. All players busted!");
+    private void dealerTurn() {
+        while (dealer.getHandValue() < 17) {
+            dealer.addToHand(deck.getCards().remove(0));
         }
+    }
+
+    private void determineWinner() {
+        int playerValue = player.getHandValue();
+        int dealerValue = dealer.getHandValue();
+
+        displayGameState(dealer, player);
+
+        if (playerValue > 21) {
+            System.out.println("You went bust! Dealer wins.");
+        } else if (dealerValue > 21) {
+            System.out.println("Dealer went bust! You win.");
+        } else if (playerValue == dealerValue) {
+            System.out.println("It's a tie!");
+        } else if (playerValue > dealerValue) {
+            System.out.println("You win!");
+        } else {
+            System.out.println("Dealer wins.");
+        }
+    }
+
+    private boolean playAgain(Scanner input) {
+        System.out.print("Do you want to play again? (Y/N) ");
+        String playAgainChoice = input.nextLine();
+        return playAgainChoice.equalsIgnoreCase("Y");
+    }
+
+    private void displayGameState(Dealer dealer, BlackjackPlayer player) {
+        System.out.println("Your hand: " + player.getHand() + " (Value: " + player.getHandValue() + ")");
+        System.out.println("Dealer's hand: " + dealer.getHand() + " (Value: " + dealer.getHandValue() + ")");
     }
 }

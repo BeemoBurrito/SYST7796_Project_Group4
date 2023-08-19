@@ -8,8 +8,7 @@ public class Dealer extends BlackjackPlayer {
 
     @Override
     public void play() {
-        // Implement the dealer's play logic here
-        // You may want to add more code to handle the dealer's actions during the game.
+
     }
 }
 
